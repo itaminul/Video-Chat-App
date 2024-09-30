@@ -30,7 +30,6 @@ navigator.mediaDevices
     audioSource.connect(audioContext.destination);
 
     peer.on("call", (call) => {
-      console.log('someone call me');
       call.answer(stream);
       const video = document.createElement("video");
       call.on("stream", (userVideoStream) => {
@@ -67,6 +66,15 @@ const inviteButton = document.querySelector("#inviteButton");
 const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
 const disconnectBtn = document.querySelector("#disconnect");
+const increaseVolumeButton = document.querySelector("#increaseVolume");
+const decreaseVolumeButton = document.querySelector("#decreaseVolume");
+const setVolume = (volume) => {
+  const videos = document.querySelectorAll('video');
+  videos.forEach((video) => {
+    video.volume = volume;
+  })
+}
+
 
 muteButton.addEventListener("click", () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
