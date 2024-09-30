@@ -33,7 +33,6 @@ io.on("connection", (socket) => {
     }, 1000);
 
     socket.on("disconnect", () => {
-      console.log("User Disconnected");
       io.to(roomId).emit("user-disconnected", userId); // Changed line
     });
   });

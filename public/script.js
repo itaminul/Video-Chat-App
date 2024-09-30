@@ -9,6 +9,11 @@ var peer = new Peer({
   host: '127.0.0.1',
   port: 3000,
   path: '/peerjs',
+  config: {
+    iceServers: [
+      { url: 'stun:stun.l.google.com:19302' }
+    ]
+  }
 });
 
 let myVideoStream;
@@ -20,6 +25,9 @@ navigator.mediaDevices
   .then((stream) => {
     myVideoStream = stream;
     addVideoStream(myVideo, stream);
+    const audioContext = new AudioContext();
+    const audioSource = audioContext.createMediaStreamSource(stream);
+    audioSource.connect(audioContext.destination);
 
     peer.on("call", (call) => {
       console.log('someone call me');
@@ -36,7 +44,6 @@ navigator.mediaDevices
   });
 
 const connectToNewUser = (userId, stream) => {
-  console.log('I call someone' + userId);
   const call = peer.call(userId, stream);
   const video = document.createElement("video");
   call.on("stream", (userVideoStream) => {
@@ -45,7 +52,6 @@ const connectToNewUser = (userId, stream) => {
 };
 
 peer.on("open", (id) => {
-  console.log('my id is' + id);
   socket.emit("join-room", ROOM_ID, id, user);
 });
 
@@ -62,15 +68,15 @@ const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
 const disconnectBtn = document.querySelector("#disconnect");
 
-muteButton.addEventListener("click",() => {
+muteButton.addEventListener("click", () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
-  if(enabled){
+  if (enabled) {
     myVideoStream.getAudioTracks()[0].enabled = false;
     html = `<i class="fas fa-microphone-slash"></i>`;
     muteButton.classList.toggle("background_red");
     muteButton.innerHTML = html;
   }
-  else{
+  else {
     myVideoStream.getAudioTracks()[0].enabled = true;
     html = `<i class="fas fa-microphone"></i>`;
     muteButton.classList.toggle("background_red");
@@ -78,32 +84,30 @@ muteButton.addEventListener("click",() => {
   }
 })
 
-stopVideo.addEventListener("click",() => {
+stopVideo.addEventListener("click", () => {
   const enabled = myVideoStream.getVideoTracks()[0].enabled;
-  if(enabled){
+  if (enabled) {
     myVideoStream.getVideoTracks()[0].enabled = false;
-    html = `<i class="fas fa-video-slash"></i>`;
+    stopVideo.innerHTML = `<i class="fas fa-video-slash"></i>`;
     stopVideo.classList.toggle("background_red");
-    stopVideo.innerHTML = html;
-  }
-  else{
+  } else {
     myVideoStream.getVideoTracks()[0].enabled = true;
-    html = `<i class="fas fa-video"></i>`;
+    stopVideo.innerHTML = `<i class="fas fa-video"></i>`;
     stopVideo.classList.toggle("background_red");
-    stopVideo.innerHTML = html;
   }
-})
+});
 
-inviteButton.addEventListener("click",() => {
+
+inviteButton.addEventListener("click", () => {
   prompt("Copy this link and send it to people you want to have video call with",
-  window.location.href
+    window.location.href
   );
 })
 
-disconnectBtn.addEventListener("click",() => {
+disconnectBtn.addEventListener("click", () => {
   peer.destroy();
   const myVideoElement = document.querySelector("video");
-  if(myVideoElement){
+  if (myVideoElement) {
     myVideoElement.remove();
   }
   socket.emit("disconnect");
