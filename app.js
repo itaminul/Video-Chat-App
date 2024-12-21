@@ -27,13 +27,12 @@ app.get('/:room', (req, res) => {
 io.on("connection", (socket) => {
   socket.on("join-room", (roomId, userId) => {
     socket.join(roomId);
-    
+
     setTimeout(() => {
       io.to(roomId).emit("user-connected", userId); // Changed line
     }, 1000);
 
     socket.on("disconnect", () => {
-      console.log("User Disconnected");
       io.to(roomId).emit("user-disconnected", userId); // Changed line
     });
   });
